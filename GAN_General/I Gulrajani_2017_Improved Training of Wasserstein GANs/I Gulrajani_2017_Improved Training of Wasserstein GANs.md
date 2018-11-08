@@ -35,3 +35,39 @@ Discriminator Loss
 作者比較 WGAN, WGAN-GP, DCGAN 在各種不同架構上的訓練，並認為 gradient penalty 的方式可以不容易造成 model collapse，因此容易訓練出結果。作者也另外實驗在離散的輸出上訓練(例如 one-hot vector)，使用 WGAN-GP 也可以訓練。
 
 <p align="center"><img src="./wgan_gp_archtecture_experiment.png" width="600"></p>
+
+
+## Code
+```python
+import torch
+
+# 1. Do not use batch normalization in discriminator
+# 2. Remove the output activation of discriminator
+def descriminator_loss(netD, real, fake, lambda_gp):
+    real_score = netD(real)
+    fake_score = netD(fake)
+
+    # 1. Randomly choose sample between real and fake
+    batch_size = real.shape[0]
+    alpha = torch.rand(batch_size, 1, 1, 1)
+    # do not backprogate gradient through fake data
+    interp = alpha * real.detach() + (1 - alpha) * fake.detach()
+    
+    # 2. Calculate gradient of interp_score w.r.t interp data
+    interp.requires_grad = True
+    interp_score = netD(interp)
+    gradient_outputs = torch.ones(interp_score.size())
+    gradient = torch.autograd.grad(outputs=interp_score, inputs=interp, \
+                                    grad_outputs=gradient_outputs, only_inputs=True)[0]
+
+    # 3. Calcuate gradient penalty
+    gradient = gradient.view(batch_size, -1)
+    gradient_penalty = ((torch.norm(gradient, 2, dim=1) - 1) ** 2).mean()
+
+    return fake_score.mean() - real_score.mean() + lambda_gp * gradient_penalty
+
+
+def generator_loss(netD, fake):
+    fake_score = netD(fake)
+    return -fake_score.mean()
+```

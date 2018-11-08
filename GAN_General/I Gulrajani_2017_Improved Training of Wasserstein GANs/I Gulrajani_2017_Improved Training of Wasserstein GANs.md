@@ -18,13 +18,13 @@
 
 Discriminator Loss
 
-<p align="center"><img src="../images/wgan_gp_loss.png" width="700"></p>
+<p align="center"><img src="./wgan_gp_loss.png" width="700"></p>
 
 
 ## Weight Clipping 的問題
 作者利用文中的推論一說明， weight clipping 會導致模型的 weight 傾向極端的分布，也就是接近被 clipping 的值，最終傾向產生簡單的模型，類似正規化 (regularization) 的效果。
 
-<p align="center"><img src="../images/wgan_vs_wgan_gp.png" width="600"></p>
+<p align="center"><img src="./wgan_vs_wgan_gp.png" width="600"></p>
 
 
 ## Gradient Penalty 的設計
@@ -34,4 +34,4 @@ Discriminator Loss
 ## WGAN-GP 在不同模型架構上的訓練
 作者比較 WGAN, WGAN-GP, DCGAN 在各種不同架構上的訓練，並認為 gradient penalty 的方式可以不容易造成 model collapse，因此容易訓練出結果。作者也另外實驗在離散的輸出上訓練(例如 one-hot vector)，使用 WGAN-GP 也可以訓練。
 
-<p align="center"><img src="../images/wgan_gp_archtecture_experiment.png" width="600"></p>
+<p align="center"><img src="./wgan_gp_archtecture_experiment.png" width="600"></p>

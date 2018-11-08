@@ -16,9 +16,7 @@
 3. (WGAN-GP) discriminator 不要使用 batch normalization，可以使用 layer normalization。這是因為 batch normalization 將每個樣本含其他的樣本連結，但在 gradient penalty 的計算上每個樣本都是獨立計算的
 4. (WGAN-GP) 移除 discriminator 輸出的 nonlinear activation
 
-Discriminator Loss
-
-<p align="center"><img src="./wgan_gp_loss.png" width="700"></p>
+<p align="center"><img src="./wgan_gp_algorithm.png" width="600"></p>
 
 
 ## Weight Clipping 的問題
@@ -28,13 +26,15 @@ Discriminator Loss
 
 
 ## Gradient Penalty 的設計
-根據 WGAN 的推導，必須要求 discriminator 要是 1-lipschitz function，也就是必須滿足每一點的 gradient norm 都要比 1 小，因此懲罰 gradient 大於 1 的情形(實際上是懲罰不為 1 的情形，作者比較過兩者後認為後者較佳)。另外，計算上只需要考慮到 data distribution 和 generator distribution 中間的點就好，除此之外的點不會在梯度下降的過程中走到。因此可以得到上面的損失函數
+根據 WGAN 的推導，必須要求 discriminator 要是 1-lipschitz function，也就是必須滿足每一點的 gradient norm 都要比 1 小，因此懲罰 gradient 大於 1 的情形(實作上是懲罰不為 1 的情形，作者比較過兩者後認為後者較佳)。另外，計算上只需要考慮到 data distribution 和 generator distribution 中間的點就好，除此之外的點不會在梯度下降的過程中走到。因此可以得到以下在 discriminator 的損失函數
 
+<p align="center"><img src="./wgan_gp_loss.png" width="700"></p>
 
 ## WGAN-GP 在不同模型架構上的訓練
 作者比較 WGAN, WGAN-GP, DCGAN 在各種不同架構上的訓練，並認為 gradient penalty 的方式可以不容易造成 model collapse，因此容易訓練出結果。作者也另外實驗在離散的輸出上訓練(例如 one-hot vector)，使用 WGAN-GP 也可以訓練。
 
 <p align="center"><img src="./wgan_gp_archtecture_experiment.png" width="600"></p>
+<p align="center"><img src="./wgan_gp_archtecture_experiment_result.png" width="600"></p>
 
 
 ## Code

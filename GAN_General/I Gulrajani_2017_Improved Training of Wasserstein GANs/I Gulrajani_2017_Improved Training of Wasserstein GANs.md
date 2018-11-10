@@ -43,6 +43,7 @@ import torch
 
 # 1. Do not use batch normalization in discriminator
 # 2. Remove the output activation of discriminator
+# 3. Update descriminator several times before updating generator
 def descriminator_loss(netD, real, fake, lambda_gp):
     real_score = netD(real)
     fake_score = netD(fake)
@@ -50,17 +51,20 @@ def descriminator_loss(netD, real, fake, lambda_gp):
     # 1. Randomly choose sample between real and fake
     batch_size = real.shape[0]
     alpha = torch.rand(batch_size, 1, 1, 1)
-    # do not backprogate gradient through fake data
+    # unnecessary to backpropagate gradient through fake data
     interp = alpha * real.detach() + (1 - alpha) * fake.detach()
     
-    # 2. Calculate gradient of interp_score w.r.t interp data
+    # 2. Calculate dD(x)/dx
     interp.requires_grad = True
     interp_score = netD(interp)
     gradient_outputs = torch.ones(interp_score.size())
+    # create_graph and retain_graph must be True, 
+    # since we calculate the 2nd gradient when backprogation on gradient penalty
     gradient = torch.autograd.grad(outputs=interp_score, inputs=interp, \
-                                    grad_outputs=gradient_outputs, only_inputs=True)[0]
+                                    grad_outputs=gradient_outputs, only_inputs=True, \
+                                    create_graph=True, retain_graph=True)[0]
 
-    # 3. Calcuate gradient penalty
+    # 3. Gradient Penalty = E[(||dD(x)/dx|| - 1)^2]
     gradient = gradient.view(batch_size, -1)
     gradient_penalty = ((torch.norm(gradient, 2, dim=1) - 1) ** 2).mean()
 
